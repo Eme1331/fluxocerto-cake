@@ -8,8 +8,10 @@ service cloud.firestore {
       allow list: if false;
       // Só permite atualizar o campo "maquinas" (registro de aparelho ativado).
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['maquinas']);
-      // Criação e exclusão de licenças só pelo Firebase Console (admin).
-      allow create, delete: if false;
+      // Criação/exclusão só autenticado como o usuário admin do gerador de licenças.
+      allow create, delete: if request.auth != null && request.auth.uid == 'ex4yoGofAySjjic3wq3VU0DYf8F3';
+      // Admin também pode corrigir qualquer campo (ex: revogar, mudar limite de aparelhos).
+      allow update: if request.auth != null && request.auth.uid == 'ex4yoGofAySjjic3wq3VU0DYf8F3';
     }
   }
 }

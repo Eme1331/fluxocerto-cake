@@ -3,33 +3,46 @@
 Backend de ativação isolado (projeto Firebase `fluxocerto-cake-lic`), sem relação com outros
 produtos. Console: https://console.firebase.google.com/project/fluxocerto-cake-lic/firestore/databases/-default-/data
 
-## Como criar uma licença nova para um cliente
+## Como criar uma licença nova para um cliente (gerador automático)
 
-1. Abra o console do Firestore (link acima) → coleção **licencas** (crie se não existir).
-2. Clique em **Adicionar documento**.
-3. **ID do documento**: o próprio código que o cliente vai digitar no app. Sugestão de formato:
-   `FCC-XXXX-XXXX-XXXX` (letras maiúsculas e números, você escolhe).
-4. Campos do documento:
+Rode, na raiz do projeto (`fluxocerto-cake/`):
 
-   | Campo         | Tipo      | Valor                                                            |
-   |---------------|-----------|-------------------------------------------------------------------|
-   | `email`       | string    | e-mail do cliente (opcional; se preenchido, precisa bater com o e-mail digitado no app) |
-   | `nome`        | string    | nome do cliente (opcional, só exibição)                          |
-   | `ativa`       | boolean   | `true`                                                             |
-   | `maxMaquinas` | number    | quantos aparelhos podem usar esse código ao mesmo tempo (ex: `1`) |
-   | `expiracao`   | timestamp | data de expiração (opcional; deixe sem criar o campo se for vitalícia) |
-   | `maquinas`    | array     | deixe **vazio** — o app preenche sozinho quando o código é ativado |
+```
+npm run gerar-licenca -- --email cliente@exemplo.com --nome "Nome do cliente" --maquinas 1
+```
 
-5. Salve. Pronto — o cliente já pode digitar esse código no app.
+Parâmetros (todos opcionais):
+
+| Parâmetro    | Efeito                                                                          |
+|--------------|----------------------------------------------------------------------------------|
+| `--email`    | se definido, a ativação só funciona se o cliente digitar esse mesmo e-mail       |
+| `--nome`     | só para identificação, não afeta a validação                                     |
+| `--maquinas` | quantos aparelhos podem usar o código ao mesmo tempo (padrão: `1`)                |
+| `--dias`     | validade em dias a partir de hoje (padrão: nunca expira)                          |
+
+O script imprime o código gerado (formato `FCC-XXXX-XXXX-XXXX`) — envie esse código
+(e o e-mail, se você definiu um) para o cliente ativar o app.
+
+### Configuração necessária (uma vez só)
+O gerador precisa de um usuário admin autenticado no Firebase. Se o arquivo
+`firebase-license/.admin-credentials.json` não existir (ele nunca é versionado no git),
+rode primeiro:
+
+```
+node firebase-license/setup-admin.mjs
+```
 
 ## Para revogar/bloquear uma licença
-Edite o documento e mude `ativa` para `false`. Na próxima verificação automática
-(a cada 7 dias, ou na próxima tentativa de ativação), o app do cliente perde o acesso.
+Edite o documento na coleção `licencas` (Firestore Console) e mude `ativa` para `false`.
+Na próxima verificação automática (a cada 7 dias, ou na próxima tentativa de ativação),
+o app do cliente perde o acesso.
 
 ## Para liberar mais aparelhos para o mesmo cliente
-Aumente o valor de `maxMaquinas` no documento dele.
+Aumente o valor de `maxMaquinas` no documento dele (pelo Console, já que o gerador
+só cria licenças novas, não edita existentes).
 
 ## Limitação conhecida
 Se o cliente compartilhar o código com outra pessoa e ainda houver "vaga" em
-`maxMaquinas`, a outra pessoa também consegue ativar. Para bloquear isso,
-mantenha `maxMaquinas: 1` (padrão) — assim o código só funciona em UM aparelho por vez.
+`maxMaquinas`, a outra pessoa também consegue ativar. Mantendo `maxMaquinas: 1`
+(padrão), o código só funciona em UM aparelho por vez — é a proteção real contra
+compartilhamento casual.
