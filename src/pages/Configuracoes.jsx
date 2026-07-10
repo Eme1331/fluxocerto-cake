@@ -1,5 +1,6 @@
 import { useStore } from '../store/useStore';
 import { Card, Field, Input, PhotoPicker, Button, SectionTitle } from '../components/ui';
+import { getActivation, clearActivation } from '../utils/activation';
 
 const CORES = [
   { key: 'primary', varName: '--fc-primary', label: 'Rosa (destaque)' },
@@ -18,10 +19,18 @@ export default function Configuracoes() {
   const custosIndiretosPadrao = useStore((s) => s.custosIndiretosPadrao);
   const setCustosIndiretosPadrao = useStore((s) => s.setCustosIndiretosPadrao);
   const resetAll = useStore((s) => s.resetAll);
+  const ativacao = getActivation();
 
   const aplicarCor = (key, varName, value) => {
     setTema({ [key]: value });
     document.documentElement.style.setProperty(varName, value);
+  };
+
+  const trocarCodigo = () => {
+    if (confirm('Isso vai pedir um novo código de ativação ao reabrir o app. Continuar?')) {
+      clearActivation();
+      window.location.reload();
+    }
   };
 
   return (
@@ -99,6 +108,16 @@ export default function Configuracoes() {
               onChange={(e) => setCustosIndiretosPadrao({ impostoPercent: e.target.value })} />
           </Field>
         </div>
+      </Card>
+
+      <SectionTitle>Ativação</SectionTitle>
+      <Card className="mb-5">
+        <p className="text-xs text-text-light mb-1">Código ativo neste aparelho</p>
+        <p className="font-bold text-text tracking-widest mb-1">{ativacao?.chave || '—'}</p>
+        {ativacao?.email && <p className="text-xs text-text-light mb-3">{ativacao.email}</p>}
+        <Button variant="outline" className="w-full" onClick={trocarCodigo}>
+          Trocar código de ativação
+        </Button>
       </Card>
 
       <SectionTitle>Dados</SectionTitle>

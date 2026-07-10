@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import BottomNav from './components/BottomNav';
+import ActivationGate from './components/ActivationGate';
 import Dashboard from './pages/Dashboard';
 import Componentes from './pages/Componentes';
 import ComponenteForm from './pages/ComponenteForm';
@@ -10,6 +11,7 @@ import Configuracoes from './pages/Configuracoes';
 import Pedidos from './pages/Pedidos';
 import PedidoForm from './pages/PedidoForm';
 import { useStore } from './store/useStore';
+import { checkActivation } from './utils/activation';
 
 const VAR_MAP = {
   primary: '--fc-primary',
@@ -20,6 +22,7 @@ const VAR_MAP = {
 
 function App() {
   const tema = useStore((s) => s.tema);
+  const [ativado, setAtivado] = useState(null); // null = verificando
 
   useEffect(() => {
     Object.entries(tema).forEach(([key, value]) => {
@@ -27,6 +30,22 @@ function App() {
       if (varName && value) document.documentElement.style.setProperty(varName, value);
     });
   }, [tema]);
+
+  useEffect(() => {
+    checkActivation().then((r) => setAtivado(r.activated));
+  }, []);
+
+  if (ativado === null) {
+    return (
+      <div className="app-shell items-center justify-center">
+        <span className="text-3xl">🎂</span>
+      </div>
+    );
+  }
+
+  if (!ativado) {
+    return <ActivationGate onActivated={() => setAtivado(true)} />;
+  }
 
   return (
     <HashRouter>

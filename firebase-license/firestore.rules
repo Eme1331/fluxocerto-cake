@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /licencas/{codigo} {
+      // Leitura pública por ID exato (necessária para o app validar a licença).
+      allow get: if true;
+      // Nunca permitir listar/enumerar todas as licenças.
+      allow list: if false;
+      // Só permite atualizar o campo "maquinas" (registro de aparelho ativado).
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['maquinas']);
+      // Criação e exclusão de licenças só pelo Firebase Console (admin).
+      allow create, delete: if false;
+    }
+  }
+}
