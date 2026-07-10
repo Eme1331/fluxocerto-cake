@@ -23,6 +23,13 @@ Parâmetros (todos opcionais):
 O script imprime o código gerado (formato `FCC-XXXX-XXXX-XXXX`) — envie esse código
 (e o e-mail, se você definiu um) para o cliente ativar o app.
 
+### Atalho na área de trabalho (sem terminal)
+Existe um atalho **"Gerar Chave FluxoCerto"** na área de trabalho apontando para
+`firebase-license/gerar-chave.bat`. Dois cliques nele abrem um prompt simples que
+pede e-mail, nome e quantidade de aparelhos, e gera a chave sem precisar digitar
+comando nenhum. Se o atalho não existir (outro computador, por exemplo), recrie
+apontando para esse mesmo `.bat`.
+
 ### Configuração necessária (uma vez só)
 O gerador precisa de um usuário admin autenticado no Firebase. Se o arquivo
 `firebase-license/.admin-credentials.json` não existir (ele nunca é versionado no git),
