@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --fc-primary: #F3B6C5;      /* rosa pastel */
+  --fc-primary-dark: #E393AA;
+  --fc-secondary: #FFFFFF;    /* branco */
+  --fc-accent: #B08968;       /* marrom claro */
+  --fc-accent-light: #E8DCCB;
+  --fc-bg: #FFF8F6;
+  --fc-text: #4A3B32;
+  --fc-text-light: #8C7A70;
+  --fc-success: #7FB88A;
+  --fc-danger: #E08585;
+}
+
+@theme inline {
+  --color-primary: var(--fc-primary);
+  --color-primary-dark: var(--fc-primary-dark);
+  --color-secondary: var(--fc-secondary);
+  --color-accent: var(--fc-accent);
+  --color-accent-light: var(--fc-accent-light);
+  --color-bg: var(--fc-bg);
+  --color-text: var(--fc-text);
+  --color-text-light: var(--fc-text-light);
+  --color-success: var(--fc-success);
+  --color-danger: var(--fc-danger);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  background: #E9E1DC;
+  color: var(--fc-text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--fc-bg);
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fc-accent-light);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--fc-primary-dark);
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--fc-primary-dark);
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  cursor: pointer;
+}

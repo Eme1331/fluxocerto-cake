@@ -1,0 +1,182 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useStore } from '../store/useStore';
+import { Card, Field, Input, Select, PhotoPicker, Button, SectionTitle } from '../components/ui';
+import IngredientesList from '../components/IngredientesList';
+import Header from '../components/Header';
+import { calcComponentTotals, formatBRL } from '../utils/calc';
+
+const CONFIG = {
+  massa: {
+    titulo: 'Massa',
+    artigo: 'da',
+    listKey: 'massas',
+    add: 'addMassa',
+    update: 'updateMassa',
+    remove: 'removeMassa',
+    categorias: ['Baunilha', 'Chocolate', 'Cenoura', 'Red Velvet', 'Fubá', 'Limão', 'Outra'],
+    temForno: true,
+    temDescricao: true,
+  },
+  recheio: {
+    titulo: 'Recheio',
+    artigo: 'do',
+    listKey: 'recheios',
+    add: 'addRecheio',
+    update: 'updateRecheio',
+    remove: 'removeRecheio',
+    categorias: ['Brigadeiro', 'Doce de leite', 'Frutas', 'Chantilly', 'Nutella', 'Outro'],
+    temForno: false,
+    temDescricao: false,
+  },
+  cobertura: {
+    titulo: 'Cobertura',
+    artigo: 'da',
+    listKey: 'coberturas',
+    add: 'addCobertura',
+    update: 'updateCobertura',
+    remove: 'removeCobertura',
+    categorias: ['Ganache', 'Chantininho', 'Buttercream', 'Pasta Americana', 'Glacê', 'Espelhada', 'Outro'],
+    temForno: false,
+    temDescricao: false,
+  },
+};
+
+export default function ComponenteForm() {
+  const { tipo, id } = useParams();
+  const navigate = useNavigate();
+  const cfg = CONFIG[tipo];
+
+  const lista = useStore((s) => s[cfg.listKey]);
+  const novoComponente = useStore((s) => s.novoComponente);
+  const novoIngrediente = useStore((s) => s.novoIngrediente);
+  const addFn = useStore((s) => s[cfg.add]);
+  const updateFn = useStore((s) => s[cfg.update]);
+  const removeFn = useStore((s) => s[cfg.remove]);
+
+  const existente = useMemo(() => lista.find((m) => m.id === id), [lista, id]);
+  const isNovo = id === 'novo';
+
+  const [form, setForm] = useState(() => existente || novoComponente());
+
+  useEffect(() => {
+    if (existente) setForm(existente);
+  }, [existente]);
+
+  const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  const totals = useMemo(() => calcComponentTotals(form), [form]);
+
+  const ingredientesListRef = useRef(null);
+
+  const adicionarIngrediente = () => {
+    setForm((f) => ({ ...f, ingredientes: [novoIngrediente(), ...f.ingredientes] }));
+    requestAnimationFrame(() => {
+      const primeiro = ingredientesListRef.current?.querySelector('[data-ingrediente-item]');
+      primeiro?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  };
+
+  const salvar = () => {
+    if (isNovo) {
+      addFn(form);
+    } else {
+      updateFn(id, form);
+    }
+    navigate('/componentes');
+  };
+
+  const excluir = () => {
+    removeFn(id);
+    navigate('/componentes');
+  };
+
+  return (
+    <div>
+      <Header
+        title={isNovo ? `${cfg.artigo === 'da' ? 'Nova' : 'Novo'} ${cfg.titulo}` : `Editar ${cfg.titulo}`}
+        onBack={true}
+      />
+      <div className="px-5">
+        <PhotoPicker value={form.foto} onChange={(foto) => set({ foto })} label={`Foto ${cfg.artigo} ${cfg.titulo.toLowerCase()}`} />
+
+        <div className="mt-4">
+          <Field label="Nome">
+            <Input value={form.nome} onChange={(e) => set({ nome: e.target.value })} placeholder={`Ex: ${cfg.titulo} de chocolate`} />
+          </Field>
+
+          <Field label={cfg.titulo === 'Cobertura' ? 'Tipo' : 'Categoria'}>
+            <Select value={form.categoria} onChange={(e) => set({ categoria: e.target.value })}>
+              <option value="">Selecione...</option>
+              {cfg.categorias.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </Select>
+          </Field>
+
+          {cfg.temDescricao && (
+            <Field label="Descrição">
+              <Input value={form.descricao} onChange={(e) => set({ descricao: e.target.value })} placeholder="Observações da receita" />
+            </Field>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Rendimento">
+              <Input value={form.rendimento} onChange={(e) => set({ rendimento: e.target.value })} placeholder="Ex: 1 kg assado" />
+            </Field>
+            <Field label="Tempo de preparo (min)">
+              <Input type="number" min="0" value={form.tempoPreparo} onChange={(e) => set({ tempoPreparo: e.target.value })} placeholder="0" />
+            </Field>
+            {cfg.temForno && (
+              <Field label="Tempo de forno (min)">
+                <Input type="number" min="0" value={form.tempoForno} onChange={(e) => set({ tempoForno: e.target.value })} placeholder="0" />
+              </Field>
+            )}
+          </div>
+        </div>
+
+        <SectionTitle
+          right={
+            <Button
+              variant="ghost"
+              className="!px-3 !py-2 text-xs"
+              onClick={adicionarIngrediente}
+            >
+              ➕ Adicionar ingrediente
+            </Button>
+          }
+        >
+          Ingredientes
+        </SectionTitle>
+
+        <IngredientesList
+          ingredientes={form.ingredientes}
+          onChange={(ingredientes) => set({ ingredientes })}
+          listRef={ingredientesListRef}
+        />
+
+        <Card className="mt-5 flex items-center justify-between !bg-accent-light/40">
+          <div>
+            <p className="text-xs text-text-light">Peso total (ingredientes)</p>
+            <p className="font-bold text-text">{totals.pesoTotalG.toFixed(0)} g</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-text-light">Custo total {cfg.artigo} {cfg.titulo.toLowerCase()}</p>
+            <p className="font-bold text-primary-dark text-lg">{formatBRL(totals.custoTotal)}</p>
+          </div>
+        </Card>
+
+        <div className="flex gap-3 mt-5 mb-6">
+          {!isNovo && (
+            <Button variant="danger" className="flex-1" onClick={excluir}>
+              Excluir
+            </Button>
+          )}
+          <Button className="flex-1" onClick={salvar}>
+            Salvar {cfg.titulo}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

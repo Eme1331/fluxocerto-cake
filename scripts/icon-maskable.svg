@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F6C6D3"/>
+      <stop offset="1" stop-color="#E393AA"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <g transform="translate(256,256) scale(0.72) translate(-256,-272)">
+    <rect x="106" y="378" width="300" height="26" rx="13" fill="#B08968"/>
+    <rect x="126" y="300" width="260" height="86" rx="18" fill="#FFF8F6"/>
+    <rect x="126" y="300" width="260" height="20" rx="10" fill="#F6C6D3"/>
+    <rect x="166" y="228" width="180" height="80" rx="16" fill="#FFF8F6"/>
+    <rect x="166" y="228" width="180" height="18" rx="9" fill="#F6C6D3"/>
+    <circle cx="196" cy="252" r="10" fill="#E393AA"/>
+    <circle cx="256" cy="248" r="12" fill="#E393AA"/>
+    <circle cx="316" cy="252" r="10" fill="#E393AA"/>
+    <rect x="246" y="176" width="20" height="52" rx="6" fill="#B08968"/>
+    <path d="M256 140 C 268 156 268 172 256 180 C 244 172 244 156 256 140 Z" fill="#FFB347"/>
+  </g>
+</svg>
