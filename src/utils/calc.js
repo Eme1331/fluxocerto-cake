@@ -22,27 +22,30 @@ export function toBase(qty, unit) {
 }
 
 // Custo de um ingrediente dentro de uma receita/componente
-// ingrediente: { precoCompra, qtdCompra, unidadeCompra, quantidadeUtilizada } — a quantidade
-// utilizada é sempre expressa na mesma unidade do pacote comprado (unidadeCompra).
-export function calcIngredientCost(ing) {
-  const precoCompra = Number(ing.precoCompra) || 0;
-  const qtdCompraBase = toBase(ing.qtdCompra, ing.unidadeCompra) || 1;
+// ingrediente: { materiaPrimaId, quantidadeUtilizada } — a quantidade utilizada é
+// sempre expressa na mesma unidade do pacote da matéria-prima (unidadeCompra).
+export function calcIngredientCost(ing, materiasPrimas = []) {
+  const materiaPrima = materiasPrimas.find((m) => m.id === ing.materiaPrimaId);
+  if (!materiaPrima) return { custoUnitario: 0, custoUtilizado: 0, materiaPrima: null };
+
+  const precoCompra = Number(materiaPrima.precoCompra) || 0;
+  const qtdCompraBase = toBase(materiaPrima.qtdCompra, materiaPrima.unidadeCompra) || 1;
   const custoPorBase = precoCompra / qtdCompraBase;
-  const qtdUsadaBase = toBase(ing.quantidadeUtilizada, ing.unidadeCompra);
+  const qtdUsadaBase = toBase(ing.quantidadeUtilizada, materiaPrima.unidadeCompra);
   const custoUnitario = custoPorBase; // custo por g/ml/und
   const custoUtilizado = custoPorBase * qtdUsadaBase;
-  return { custoUnitario, custoUtilizado };
+  return { custoUnitario, custoUtilizado, materiaPrima };
 }
 
 // Totais de um componente (massa, recheio ou cobertura)
-export function calcComponentTotals(componente) {
+export function calcComponentTotals(componente, materiasPrimas = []) {
   const ingredientes = componente?.ingredientes || [];
   let custoTotal = 0;
   let pesoTotalG = 0;
   for (const ing of ingredientes) {
-    const { custoUtilizado } = calcIngredientCost(ing);
+    const { custoUtilizado, materiaPrima } = calcIngredientCost(ing, materiasPrimas);
     custoTotal += custoUtilizado;
-    pesoTotalG += toBase(ing.quantidadeUtilizada, ing.unidadeCompra);
+    if (materiaPrima) pesoTotalG += toBase(ing.quantidadeUtilizada, materiaPrima.unidadeCompra);
   }
   const tempoTotalMin = (Number(componente?.tempoPreparo) || 0) + (Number(componente?.tempoForno) || 0);
   return {
@@ -88,7 +91,7 @@ export function calcCustosAutomaticos(tempoTotalMin, custosIndiretosPadrao = {})
   return { tempoTotalMin: tempo, custoGas, custoEnergia, custoAgua, custoMaoDeObra, total };
 }
 
-function somarSelecoes(selecoes, lista) {
+function somarSelecoes(selecoes, lista, materiasPrimas) {
   let custoTotal = 0;
   let pesoTotalKg = 0;
   let tempoTotalMin = 0;
@@ -97,7 +100,7 @@ function somarSelecoes(selecoes, lista) {
     const componente = lista.find((c) => c.id === sel.componenteId);
     if (!componente) continue;
     const qtd = Number(sel.quantidade) || 1;
-    const totals = calcComponentTotals(componente);
+    const totals = calcComponentTotals(componente, materiasPrimas);
     custoTotal += totals.custoTotal * qtd;
     pesoTotalKg += totals.pesoTotalKg * qtd;
     tempoTotalMin += totals.tempoTotalMin * qtd;
@@ -107,11 +110,12 @@ function somarSelecoes(selecoes, lista) {
 }
 
 // Junta os componentes selecionados de uma receita e calcula tudo
-// listas: { massas, recheios, coberturas, custosIndiretosPadrao }
+// listas: { massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao }
 export function calcReceitaCompleta(receita, listas) {
-  const massas = somarSelecoes(receita.massas, listas.massas);
-  const recheios = somarSelecoes(receita.recheios, listas.recheios);
-  const coberturas = somarSelecoes(receita.coberturas, listas.coberturas);
+  const materiasPrimas = listas.materiasPrimas || [];
+  const massas = somarSelecoes(receita.massas, listas.massas, materiasPrimas);
+  const recheios = somarSelecoes(receita.recheios, listas.recheios, materiasPrimas);
+  const coberturas = somarSelecoes(receita.coberturas, listas.coberturas, materiasPrimas);
 
   const extras = receita.custosExtras || {};
   const custoIndiretosManual = Object.values(extras).reduce((acc, v) => acc + (Number(v) || 0), 0);

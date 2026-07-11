@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Select, Input, Button, IconButton, Field } from './ui';
 import { calcComponentTotals, formatBRL } from '../utils/calc';
 
-export default function ComponenteSelector({ label, opcoes, selecionados, onChange }) {
+export default function ComponenteSelector({ label, opcoes, selecionados, onChange, materiasPrimas = [] }) {
   const [escolhido, setEscolhido] = useState('');
 
   const disponiveis = opcoes.filter((o) => !selecionados.some((s) => s.componenteId === o.id));
@@ -42,7 +42,7 @@ export default function ComponenteSelector({ label, opcoes, selecionados, onChan
           {selecionados.map((sel) => {
             const componente = opcoes.find((o) => o.id === sel.componenteId);
             if (!componente) return null;
-            const { custoTotal } = calcComponentTotals(componente);
+            const { custoTotal } = calcComponentTotals(componente, materiasPrimas);
             return (
               <div key={sel.componenteId} className="flex items-center gap-2 bg-accent-light/25 rounded-2xl px-3 py-2">
                 <div className="flex-1 min-w-0">

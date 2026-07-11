@@ -9,8 +9,9 @@ export default function Receitas() {
   const massas = useStore((s) => s.massas);
   const recheios = useStore((s) => s.recheios);
   const coberturas = useStore((s) => s.coberturas);
+  const materiasPrimas = useStore((s) => s.materiasPrimas);
   const custosIndiretosPadrao = useStore((s) => s.custosIndiretosPadrao);
-  const listas = { massas, recheios, coberturas, custosIndiretosPadrao };
+  const listas = { massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao };
 
   return (
     <div className="px-5 pt-7">

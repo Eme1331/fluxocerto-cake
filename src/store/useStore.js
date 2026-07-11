@@ -2,12 +2,19 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuid } from 'uuid';
 
-const emptyIngrediente = () => ({
+const emptyMateriaPrima = () => ({
   id: uuid(),
   nome: '',
+  categoria: '',
   precoCompra: '',
   qtdCompra: '',
   unidadeCompra: 'kg',
+  createdAt: Date.now(),
+});
+
+const emptyIngrediente = () => ({
+  id: uuid(),
+  materiaPrimaId: '',
   quantidadeUtilizada: '',
 });
 
@@ -34,6 +41,7 @@ const emptyPedido = (extra = {}) => ({
   hora: '09:00',
   tipo: 'Entrega',
   status: 'Pendente',
+  valor: '',
   observacoes: '',
   createdAt: Date.now(),
   ...extra,
@@ -62,6 +70,51 @@ const emptyReceita = () => ({
   createdAt: Date.now(),
 });
 
+// v3 -> v4: ingredientes deixam de guardar nome/preço/unidade embutidos e passam
+// a referenciar um catálogo de matérias-primas (materiaPrimaId). Esta migração
+// extrai uma matéria-prima para cada ingrediente já cadastrado, preservando os
+// dados existentes em vez de resetar tudo.
+function migrarIngredientesParaMateriaPrima(persisted) {
+  const materiasPrimas = [];
+  const indice = new Map();
+
+  function obterOuCriarMateriaPrima(ing) {
+    const chave = `${ing.nome}|${ing.precoCompra}|${ing.qtdCompra}|${ing.unidadeCompra}`;
+    if (indice.has(chave)) return indice.get(chave);
+    const id = uuid();
+    materiasPrimas.push({
+      id,
+      nome: ing.nome || 'Sem nome',
+      categoria: '',
+      precoCompra: ing.precoCompra || '',
+      qtdCompra: ing.qtdCompra || '',
+      unidadeCompra: ing.unidadeCompra || 'kg',
+      createdAt: Date.now(),
+    });
+    indice.set(chave, id);
+    return id;
+  }
+
+  function migrarLista(lista) {
+    return (lista || []).map((comp) => ({
+      ...comp,
+      ingredientes: (comp.ingredientes || []).map((ing) => ({
+        id: ing.id,
+        materiaPrimaId: ing.materiaPrimaId || obterOuCriarMateriaPrima(ing),
+        quantidadeUtilizada: ing.quantidadeUtilizada || '',
+      })),
+    }));
+  }
+
+  persisted.massas = migrarLista(persisted.massas);
+  persisted.recheios = migrarLista(persisted.recheios);
+  persisted.coberturas = migrarLista(persisted.coberturas);
+  persisted.materiasPrimas = [...(persisted.materiasPrimas || []), ...materiasPrimas];
+  persisted.pedidos = (persisted.pedidos || []).map((p) => ({ ...p, valor: p.valor ?? '' }));
+  persisted.valoresOcultos = persisted.valoresOcultos ?? false;
+  return persisted;
+}
+
 export const useStore = create(
   persist(
     (set, get) => ({
@@ -83,7 +136,9 @@ export const useStore = create(
         taxaIfood: '',
         impostoPercent: '',
       },
+      valoresOcultos: false,
 
+      materiasPrimas: [],
       massas: [],
       recheios: [],
       coberturas: [],
@@ -95,11 +150,19 @@ export const useStore = create(
       setTema: (patch) => set((s) => ({ tema: { ...s.tema, ...patch } })),
       setCustosIndiretosPadrao: (patch) =>
         set((s) => ({ custosIndiretosPadrao: { ...s.custosIndiretosPadrao, ...patch } })),
+      toggleValoresOcultos: () => set((s) => ({ valoresOcultos: !s.valoresOcultos })),
 
+      novaMateriaPrima: emptyMateriaPrima,
       novoIngrediente: emptyIngrediente,
       novoComponente: emptyComponente,
       novaReceita: emptyReceita,
       novoPedido: emptyPedido,
+
+      // Matérias-primas
+      addMateriaPrima: (mp) => set((s) => ({ materiasPrimas: [...s.materiasPrimas, mp] })),
+      updateMateriaPrima: (id, patch) =>
+        set((s) => ({ materiasPrimas: s.materiasPrimas.map((m) => (m.id === id ? { ...m, ...patch } : m)) })),
+      removeMateriaPrima: (id) => set((s) => ({ materiasPrimas: s.materiasPrimas.filter((m) => m.id !== id) })),
 
       // Massas
       addMassa: (massa) => set((s) => ({ massas: [...s.massas, massa] })),
@@ -132,12 +195,16 @@ export const useStore = create(
       removePedido: (id) => set((s) => ({ pedidos: s.pedidos.filter((p) => p.id !== id) })),
 
       resetAll: () =>
-        set({ massas: [], recheios: [], coberturas: [], receitas: [], pedidos: [] }),
+        set({ materiasPrimas: [], massas: [], recheios: [], coberturas: [], receitas: [], pedidos: [] }),
     }),
     {
       name: 'fluxocerto-cake-storage',
-      version: 3,
-      migrate: () => ({}),
+      version: 4,
+      migrate: (persisted, version) => {
+        if (!persisted) return persisted;
+        if (version < 4) return migrarIngredientesParaMateriaPrima(persisted);
+        return persisted;
+      },
     }
   )
 );

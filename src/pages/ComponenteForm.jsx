@@ -48,6 +48,7 @@ export default function ComponenteForm() {
   const cfg = CONFIG[tipo];
 
   const lista = useStore((s) => s[cfg.listKey]);
+  const materiasPrimas = useStore((s) => s.materiasPrimas);
   const novoComponente = useStore((s) => s.novoComponente);
   const novoIngrediente = useStore((s) => s.novoIngrediente);
   const addFn = useStore((s) => s[cfg.add]);
@@ -65,7 +66,7 @@ export default function ComponenteForm() {
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
-  const totals = useMemo(() => calcComponentTotals(form), [form]);
+  const totals = useMemo(() => calcComponentTotals(form, materiasPrimas), [form, materiasPrimas]);
 
   const ingredientesListRef = useRef(null);
 
@@ -141,6 +142,7 @@ export default function ComponenteForm() {
               variant="ghost"
               className="!px-3 !py-2 text-xs"
               onClick={adicionarIngrediente}
+              disabled={!materiasPrimas.length}
             >
               ➕ Adicionar ingrediente
             </Button>
@@ -149,10 +151,17 @@ export default function ComponenteForm() {
           Ingredientes
         </SectionTitle>
 
+        {!materiasPrimas.length && (
+          <p className="text-xs text-text-light bg-accent-light/30 rounded-xl px-3 py-2 mb-3">
+            Cadastre matérias-primas na aba <strong>Componentes → Matéria-prima</strong> antes de adicionar ingredientes aqui.
+          </p>
+        )}
+
         <IngredientesList
           ingredientes={form.ingredientes}
           onChange={(ingredientes) => set({ ingredientes })}
           listRef={ingredientesListRef}
+          materiasPrimas={materiasPrimas}
         />
 
         <Card className="mt-5 flex items-center justify-between !bg-accent-light/40">

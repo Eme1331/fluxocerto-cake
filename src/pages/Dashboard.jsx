@@ -12,18 +12,22 @@ export default function Dashboard() {
   const massas = useStore((s) => s.massas);
   const recheios = useStore((s) => s.recheios);
   const coberturas = useStore((s) => s.coberturas);
+  const materiasPrimas = useStore((s) => s.materiasPrimas);
   const receitas = useStore((s) => s.receitas);
   const pedidos = useStore((s) => s.pedidos);
   const custosIndiretosPadrao = useStore((s) => s.custosIndiretosPadrao);
+  const valoresOcultos = useStore((s) => s.valoresOcultos);
+  const toggleValoresOcultos = useStore((s) => s.toggleValoresOcultos);
   const temPedidosPendentes = pedidos.some((p) => p.status === 'Pendente');
+  const v = (valor) => (valoresOcultos ? '••••••' : formatBRL(valor));
 
   const hora = new Date().getHours();
   const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
 
   const analisadas = useMemo(() => {
-    const listas = { massas, recheios, coberturas, custosIndiretosPadrao };
+    const listas = { massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao };
     return receitas.map((r) => ({ receita: r, calc: calcReceitaCompleta(r, listas) }));
-  }, [receitas, massas, recheios, coberturas, custosIndiretosPadrao]);
+  }, [receitas, massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao]);
 
   const totalReceitas = analisadas.length;
   const lucroMedio = totalReceitas
@@ -39,6 +43,10 @@ export default function Dashboard() {
   const menosLucrativa = analisadas.length
     ? analisadas.reduce((a, b) => (b.calc.lucroTotal < a.calc.lucroTotal ? b : a))
     : null;
+
+  const totalPedidos = pedidos
+    .filter((p) => p.status !== 'Cancelado')
+    .reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
 
   return (
     <div className="px-5 pt-7">
@@ -65,16 +73,28 @@ export default function Dashboard() {
         className="!p-5 text-white mb-5"
         style={{ background: 'linear-gradient(135deg, var(--fc-primary), var(--fc-primary-dark))' }}
       >
-        <p className="text-xs font-medium opacity-90 mb-1">Resumo financeiro</p>
-        <p className="text-2xl font-extrabold mb-3">{formatBRL(lucroMedio)} <span className="text-sm font-medium opacity-90">lucro médio/receita</span></p>
-        <div className="flex gap-3">
-          <div className="flex-1 bg-white/20 rounded-2xl px-3 py-2">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-xs font-medium opacity-90">Resumo financeiro</p>
+          <button
+            onClick={toggleValoresOcultos}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 text-sm active:scale-95 transition"
+          >
+            {valoresOcultos ? '🙈' : '👁️'}
+          </button>
+        </div>
+        <p className="text-2xl font-extrabold mb-3">{v(lucroMedio)} <span className="text-sm font-medium opacity-90">lucro médio/receita</span></p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white/20 rounded-2xl px-2 py-2">
             <p className="text-[10px] opacity-90">Custo médio</p>
-            <p className="text-sm font-bold">{formatBRL(custoMedio)}</p>
+            <p className="text-sm font-bold">{v(custoMedio)}</p>
           </div>
-          <div className="flex-1 bg-white/20 rounded-2xl px-3 py-2">
-            <p className="text-[10px] opacity-90">Receitas cadastradas</p>
+          <div className="bg-white/20 rounded-2xl px-2 py-2">
+            <p className="text-[10px] opacity-90">Receitas</p>
             <p className="text-sm font-bold">{totalReceitas}</p>
+          </div>
+          <div className="bg-white/20 rounded-2xl px-2 py-2">
+            <p className="text-[10px] opacity-90">Pedidos</p>
+            <p className="text-sm font-bold">{pedidos.length ? v(totalPedidos) : '—'}</p>
           </div>
         </div>
       </Card>
@@ -113,7 +133,7 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-semibold text-success uppercase tracking-wide">Mais lucrativa</p>
                 <p className="font-bold text-text truncate">{maisLucrativa.receita.nome || 'Sem nome'}</p>
-                <p className="text-xs text-text-light">Lucro: {formatBRL(maisLucrativa.calc.lucroTotal)}</p>
+                <p className="text-xs text-text-light">Lucro: {v(maisLucrativa.calc.lucroTotal)}</p>
               </div>
             </Card>
           )}
@@ -127,7 +147,7 @@ export default function Dashboard() {
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-semibold text-danger uppercase tracking-wide">Menos lucrativa</p>
                 <p className="font-bold text-text truncate">{menosLucrativa.receita.nome || 'Sem nome'}</p>
-                <p className="text-xs text-text-light">Lucro: {formatBRL(menosLucrativa.calc.lucroTotal)}</p>
+                <p className="text-xs text-text-light">Lucro: {v(menosLucrativa.calc.lucroTotal)}</p>
               </div>
             </Card>
           )}

@@ -23,6 +23,7 @@ export default function ReceitaForm() {
   const massas = useStore((s) => s.massas);
   const recheios = useStore((s) => s.recheios);
   const coberturas = useStore((s) => s.coberturas);
+  const materiasPrimas = useStore((s) => s.materiasPrimas);
   const custosIndiretosPadrao = useStore((s) => s.custosIndiretosPadrao);
   const novaReceita = useStore((s) => s.novaReceita);
   const addReceita = useStore((s) => s.addReceita);
@@ -40,10 +41,10 @@ export default function ReceitaForm() {
   const setExtra = (key, value) =>
     setForm((f) => ({ ...f, custosExtras: { ...f.custosExtras, [key]: value } }));
 
-  const listas = { massas, recheios, coberturas, custosIndiretosPadrao };
+  const listas = { massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao };
   const calc = useMemo(
     () => calcReceitaCompleta(form, listas),
-    [form, massas, recheios, coberturas, custosIndiretosPadrao]
+    [form, massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao]
   );
 
   const salvar = () => {
@@ -93,18 +94,21 @@ export default function ReceitaForm() {
             opcoes={massas}
             selecionados={form.massas}
             onChange={(massas) => set({ massas })}
+            materiasPrimas={materiasPrimas}
           />
           <ComponenteSelector
             label="Recheio(s)"
             opcoes={recheios}
             selecionados={form.recheios}
             onChange={(recheios) => set({ recheios })}
+            materiasPrimas={materiasPrimas}
           />
           <ComponenteSelector
             label="Cobertura(s)"
             opcoes={coberturas}
             selecionados={form.coberturas}
             onChange={(coberturas) => set({ coberturas })}
+            materiasPrimas={materiasPrimas}
           />
           {(!massas.length || !recheios.length || !coberturas.length) && (
             <p className="text-xs text-text-light bg-accent-light/30 rounded-xl px-3 py-2">

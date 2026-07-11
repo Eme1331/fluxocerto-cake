@@ -10,6 +10,7 @@ import ReceitaForm from './pages/ReceitaForm';
 import Configuracoes from './pages/Configuracoes';
 import Pedidos from './pages/Pedidos';
 import PedidoForm from './pages/PedidoForm';
+import MateriaPrimaForm from './pages/MateriaPrimaForm';
 import { useStore } from './store/useStore';
 import { checkActivation } from './utils/activation';
 
@@ -55,6 +56,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/componentes" element={<Componentes />} />
             <Route path="/componentes/:tipo/:id" element={<ComponenteForm />} />
+            <Route path="/materia-prima/:id" element={<MateriaPrimaForm />} />
             <Route path="/receitas" element={<Receitas />} />
             <Route path="/receitas/:id" element={<ReceitaForm />} />
             <Route path="/config" element={<Configuracoes />} />

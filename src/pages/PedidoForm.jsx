@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { Card, Field, Input, Select, TextArea, Button } from '../components/ui';
 import Header from '../components/Header';
 import { STATUS_OPTIONS, TIPO_OPTIONS } from '../utils/pedidos';
+import { calcReceitaCompleta } from '../utils/calc';
 
 export default function PedidoForm() {
   const { id } = useParams();
@@ -13,6 +14,11 @@ export default function PedidoForm() {
 
   const pedidos = useStore((s) => s.pedidos);
   const receitas = useStore((s) => s.receitas);
+  const massas = useStore((s) => s.massas);
+  const recheios = useStore((s) => s.recheios);
+  const coberturas = useStore((s) => s.coberturas);
+  const materiasPrimas = useStore((s) => s.materiasPrimas);
+  const custosIndiretosPadrao = useStore((s) => s.custosIndiretosPadrao);
   const novoPedido = useStore((s) => s.novoPedido);
   const addPedido = useStore((s) => s.addPedido);
   const updatePedido = useStore((s) => s.updatePedido);
@@ -42,7 +48,13 @@ export default function PedidoForm() {
 
   const selecionarReceita = (receitaId) => {
     const receita = receitas.find((r) => r.id === receitaId);
-    set({ receitaId, produtoNome: receita ? receita.nome : form.produtoNome });
+    if (!receita) {
+      set({ receitaId: '' });
+      return;
+    }
+    const listas = { massas, recheios, coberturas, materiasPrimas, custosIndiretosPadrao };
+    const calc = calcReceitaCompleta(receita, listas);
+    set({ receitaId, produtoNome: receita.nome, valor: calc.precoIdeal.toFixed(2) });
   };
 
   return (
@@ -66,9 +78,21 @@ export default function PedidoForm() {
           />
         </Field>
 
-        <Field label="Cliente">
-          <Input value={form.cliente} onChange={(e) => set({ cliente: e.target.value })} placeholder="Nome do cliente" />
-        </Field>
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Cliente">
+            <Input value={form.cliente} onChange={(e) => set({ cliente: e.target.value })} placeholder="Nome do cliente" />
+          </Field>
+          <Field label="Valor (R$)">
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.valor}
+              onChange={(e) => set({ valor: e.target.value })}
+              placeholder="0,00"
+            />
+          </Field>
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Field label="Data">
