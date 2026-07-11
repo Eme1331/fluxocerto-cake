@@ -14,7 +14,7 @@ const CONFIG = {
     add: 'addMassa',
     update: 'updateMassa',
     remove: 'removeMassa',
-    categorias: ['Baunilha', 'Chocolate', 'Cenoura', 'Red Velvet', 'Fubá', 'Limão', 'Massa para Docinho', 'Massa para Cookies', 'Outra'],
+    categorias: ['Baunilha', 'Chocolate', 'Cenoura', 'Red Velvet', 'Fubá', 'Limão', 'Docinho', 'Cookies', 'Brownie', 'Outra'],
     temDescricao: true,
   },
   recheio: {
