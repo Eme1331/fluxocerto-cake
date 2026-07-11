@@ -82,7 +82,9 @@ export default function Dashboard() {
             {valoresOcultos ? '🙈' : '👁️'}
           </button>
         </div>
-        <p className="text-2xl font-extrabold mb-3">{v(lucroMedio)} <span className="text-sm font-medium opacity-90">lucro médio/receita</span></p>
+        <p className="text-2xl font-extrabold mb-3">
+          {pedidos.length ? v(totalPedidos) : '—'} <span className="text-sm font-medium opacity-90">total dos pedidos</span>
+        </p>
         <div className="grid grid-cols-3 gap-2">
           <div className="bg-white/20 rounded-2xl px-2 py-2">
             <p className="text-[10px] opacity-90">Custo médio</p>
@@ -93,8 +95,8 @@ export default function Dashboard() {
             <p className="text-sm font-bold">{totalReceitas}</p>
           </div>
           <div className="bg-white/20 rounded-2xl px-2 py-2">
-            <p className="text-[10px] opacity-90">Pedidos</p>
-            <p className="text-sm font-bold">{pedidos.length ? v(totalPedidos) : '—'}</p>
+            <p className="text-[10px] opacity-90">Lucro médio</p>
+            <p className="text-sm font-bold">{v(lucroMedio)}</p>
           </div>
         </div>
       </Card>

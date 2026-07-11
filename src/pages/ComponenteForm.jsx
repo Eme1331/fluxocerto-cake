@@ -165,14 +165,8 @@ export default function ComponenteForm() {
         />
 
         <Card className="mt-5 flex items-center justify-between !bg-accent-light/40">
-          <div>
-            <p className="text-xs text-text-light">Peso total (ingredientes)</p>
-            <p className="font-bold text-text">{totals.pesoTotalG.toFixed(0)} g</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-text-light">Custo total {cfg.artigo} {cfg.titulo.toLowerCase()}</p>
-            <p className="font-bold text-primary-dark text-lg">{formatBRL(totals.custoTotal)}</p>
-          </div>
+          <p className="text-xs text-text-light">Custo total {cfg.artigo} {cfg.titulo.toLowerCase()}</p>
+          <p className="font-bold text-primary-dark text-lg">{formatBRL(totals.custoTotal)}</p>
         </Card>
 
         <div className="flex gap-3 mt-5 mb-6">
