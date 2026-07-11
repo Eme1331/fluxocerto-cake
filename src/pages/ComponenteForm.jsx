@@ -14,8 +14,7 @@ const CONFIG = {
     add: 'addMassa',
     update: 'updateMassa',
     remove: 'removeMassa',
-    categorias: ['Baunilha', 'Chocolate', 'Cenoura', 'Red Velvet', 'Fubá', 'Limão', 'Outra'],
-    temForno: true,
+    categorias: ['Baunilha', 'Chocolate', 'Cenoura', 'Red Velvet', 'Fubá', 'Limão', 'Massa para Docinho', 'Massa para Cookies', 'Outra'],
     temDescricao: true,
   },
   recheio: {
@@ -26,7 +25,6 @@ const CONFIG = {
     update: 'updateRecheio',
     remove: 'removeRecheio',
     categorias: ['Brigadeiro', 'Doce de leite', 'Frutas', 'Chantilly', 'Nutella', 'Outro'],
-    temForno: false,
     temDescricao: false,
   },
   cobertura: {
@@ -36,8 +34,7 @@ const CONFIG = {
     add: 'addCobertura',
     update: 'updateCobertura',
     remove: 'removeCobertura',
-    categorias: ['Ganache', 'Chantininho', 'Buttercream', 'Pasta Americana', 'Glacê', 'Espelhada', 'Outro'],
-    temForno: false,
+    categorias: ['Ganache', 'Chantininho', 'Chantilly', 'Buttercream', 'Pasta Americana', 'Glacê', 'Espelhada', 'Outro'],
     temDescricao: false,
   },
 };
@@ -121,19 +118,9 @@ export default function ComponenteForm() {
             </Field>
           )}
 
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="Rendimento">
-              <Input value={form.rendimento} onChange={(e) => set({ rendimento: e.target.value })} placeholder="Ex: 1 kg assado" />
-            </Field>
-            <Field label="Tempo de preparo (min)">
-              <Input type="number" min="0" value={form.tempoPreparo} onChange={(e) => set({ tempoPreparo: e.target.value })} placeholder="0" />
-            </Field>
-            {cfg.temForno && (
-              <Field label="Tempo de forno (min)">
-                <Input type="number" min="0" value={form.tempoForno} onChange={(e) => set({ tempoForno: e.target.value })} placeholder="0" />
-              </Field>
-            )}
-          </div>
+          <Field label="Rendimento">
+            <Input value={form.rendimento} onChange={(e) => set({ rendimento: e.target.value })} placeholder="Ex: 1 kg assado" />
+          </Field>
         </div>
 
         <SectionTitle

@@ -47,12 +47,10 @@ export function calcComponentTotals(componente, materiasPrimas = []) {
     custoTotal += custoUtilizado;
     if (materiaPrima) pesoTotalG += toBase(ing.quantidadeUtilizada, materiaPrima.unidadeCompra);
   }
-  const tempoTotalMin = (Number(componente?.tempoPreparo) || 0) + (Number(componente?.tempoForno) || 0);
   return {
     custoTotal,
     pesoTotalG,
     pesoTotalKg: pesoTotalG / 1000,
-    tempoTotalMin,
   };
 }
 
@@ -94,7 +92,6 @@ export function calcCustosAutomaticos(tempoTotalMin, custosIndiretosPadrao = {})
 function somarSelecoes(selecoes, lista, materiasPrimas) {
   let custoTotal = 0;
   let pesoTotalKg = 0;
-  let tempoTotalMin = 0;
   const itens = [];
   for (const sel of selecoes || []) {
     const componente = lista.find((c) => c.id === sel.componenteId);
@@ -103,10 +100,9 @@ function somarSelecoes(selecoes, lista, materiasPrimas) {
     const totals = calcComponentTotals(componente, materiasPrimas);
     custoTotal += totals.custoTotal * qtd;
     pesoTotalKg += totals.pesoTotalKg * qtd;
-    tempoTotalMin += totals.tempoTotalMin * qtd;
     itens.push({ componente, quantidade: qtd, ...totals });
   }
-  return { custoTotal, pesoTotalKg, tempoTotalMin, itens };
+  return { custoTotal, pesoTotalKg, itens };
 }
 
 // Junta os componentes selecionados de uma receita e calcula tudo
@@ -120,7 +116,7 @@ export function calcReceitaCompleta(receita, listas) {
   const extras = receita.custosExtras || {};
   const custoIndiretosManual = Object.values(extras).reduce((acc, v) => acc + (Number(v) || 0), 0);
 
-  const tempoTotalMin = massas.tempoTotalMin + recheios.tempoTotalMin + coberturas.tempoTotalMin +
+  const tempoTotalMin = (Number(receita.tempoPreparo) || 0) + (Number(receita.tempoForno) || 0) +
     (Number(receita.tempoDecoracao) || 0);
   const automaticos = calcCustosAutomaticos(tempoTotalMin, listas.custosIndiretosPadrao);
 
@@ -130,7 +126,7 @@ export function calcReceitaCompleta(receita, listas) {
   const custoIndiretos = custoIndiretosManual + automaticos.total;
   const custoTotal = custoMassa + custoRecheio + custoCobertura + custoIndiretos;
 
-  const pesoFinalKg = (Number(receita.pesoFinal) || 0) / 1000 ||
+  const pesoFinalKg = Number(receita.pesoFinal) ||
     massas.pesoTotalKg + recheios.pesoTotalKg + coberturas.pesoTotalKg || 1;
 
   const pricing = calcPricing(custoTotal, receita.margem, Number(receita.fatias) || 1, pesoFinalKg);

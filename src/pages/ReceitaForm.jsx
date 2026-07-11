@@ -72,8 +72,8 @@ export default function ReceitaForm() {
             <Input value={form.categoria} onChange={(e) => set({ categoria: e.target.value })} placeholder="Ex: Aniversário, Casamento..." />
           </Field>
           <div className="grid grid-cols-3 gap-2">
-            <Field label="Peso final (g)">
-              <Input type="number" min="0" value={form.pesoFinal} onChange={(e) => set({ pesoFinal: e.target.value })} placeholder="0" />
+            <Field label="Peso final (kg)">
+              <Input type="number" min="0" step="0.01" value={form.pesoFinal} onChange={(e) => set({ pesoFinal: e.target.value })} placeholder="0" />
             </Field>
             <Field label="Andares">
               <Input type="number" min="1" value={form.andares} onChange={(e) => set({ andares: e.target.value })} />
@@ -82,9 +82,17 @@ export default function ReceitaForm() {
               <Input type="number" min="1" value={form.fatias} onChange={(e) => set({ fatias: e.target.value })} />
             </Field>
           </div>
-          <Field label="Tempo de decoração (min)">
-            <Input type="number" min="0" value={form.tempoDecoracao} onChange={(e) => set({ tempoDecoracao: e.target.value })} placeholder="0" />
-          </Field>
+          <div className="grid grid-cols-3 gap-2">
+            <Field label="Tempo de preparo (min)">
+              <Input type="number" min="0" value={form.tempoPreparo} onChange={(e) => set({ tempoPreparo: e.target.value })} placeholder="0" />
+            </Field>
+            <Field label="Tempo de forno (min)">
+              <Input type="number" min="0" value={form.tempoForno} onChange={(e) => set({ tempoForno: e.target.value })} placeholder="0" />
+            </Field>
+            <Field label="Tempo de decoração (min)">
+              <Input type="number" min="0" value={form.tempoDecoracao} onChange={(e) => set({ tempoDecoracao: e.target.value })} placeholder="0" />
+            </Field>
+          </div>
         </div>
 
         <SectionTitle>Componentes</SectionTitle>
