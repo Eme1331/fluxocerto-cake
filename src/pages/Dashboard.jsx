@@ -44,9 +44,8 @@ export default function Dashboard() {
     ? analisadas.reduce((a, b) => (b.calc.lucroTotal < a.calc.lucroTotal ? b : a))
     : null;
 
-  const totalPedidos = pedidos
-    .filter((p) => p.status !== 'Cancelado')
-    .reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
+  const pedidosEntregues = pedidos.filter((p) => p.status === 'Entregue');
+  const faturamentoTotal = pedidosEntregues.reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
 
   return (
     <div className="px-5 pt-7">
@@ -83,20 +82,24 @@ export default function Dashboard() {
           </button>
         </div>
         <p className="text-2xl font-extrabold mb-3">
-          {pedidos.length ? v(totalPedidos) : '—'} <span className="text-sm font-medium opacity-90">total dos pedidos</span>
+          {pedidosEntregues.length ? v(faturamentoTotal) : '—'} <span className="text-sm font-medium opacity-90">faturamento total</span>
         </p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="bg-white/20 rounded-2xl px-2 py-2">
             <p className="text-[10px] opacity-90">Custo médio</p>
             <p className="text-sm font-bold">{v(custoMedio)}</p>
           </div>
           <div className="bg-white/20 rounded-2xl px-2 py-2">
-            <p className="text-[10px] opacity-90">Receitas</p>
+            <p className="text-[10px] opacity-90">Lucro médio</p>
+            <p className="text-sm font-bold">{v(lucroMedio)}</p>
+          </div>
+          <div className="bg-white/20 rounded-2xl px-2 py-2">
+            <p className="text-[10px] opacity-90">Receitas cadastradas</p>
             <p className="text-sm font-bold">{totalReceitas}</p>
           </div>
           <div className="bg-white/20 rounded-2xl px-2 py-2">
-            <p className="text-[10px] opacity-90">Lucro médio</p>
-            <p className="text-sm font-bold">{v(lucroMedio)}</p>
+            <p className="text-[10px] opacity-90">Pedidos</p>
+            <p className="text-sm font-bold">{pedidos.length}</p>
           </div>
         </div>
       </Card>
