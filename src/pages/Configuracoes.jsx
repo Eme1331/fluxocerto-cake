@@ -2,11 +2,20 @@ import { useStore } from '../store/useStore';
 import { Card, Field, Input, PhotoPicker, Button, SectionTitle } from '../components/ui';
 import { getActivation, clearActivation } from '../utils/activation';
 
-const CORES = [
-  { key: 'primary', varName: '--fc-primary', label: 'Rosa (destaque)' },
-  { key: 'primaryDark', varName: '--fc-primary-dark', label: 'Rosa escuro' },
-  { key: 'accent', varName: '--fc-accent', label: 'Marrom claro' },
-  { key: 'bg', varName: '--fc-bg', label: 'Fundo (branco)' },
+const VAR_MAP = {
+  primary: '--fc-primary',
+  primaryDark: '--fc-primary-dark',
+  accent: '--fc-accent',
+  bg: '--fc-bg',
+};
+
+const TEMAS = [
+  { nome: 'Rosa Doce', primary: '#F3B6C5', primaryDark: '#E393AA', accent: '#B08968', bg: '#FFF8F6' },
+  { nome: 'Lilás Suave', primary: '#DCC6F0', primaryDark: '#B99AE0', accent: '#8D7B94', bg: '#FAF6FE' },
+  { nome: 'Menta Fresca', primary: '#BFE8D4', primaryDark: '#93D1B3', accent: '#6E8F7C', bg: '#F4FBF7' },
+  { nome: 'Azul Céu', primary: '#BFE0F7', primaryDark: '#8FC6EC', accent: '#6D8CA3', bg: '#F3FAFE' },
+  { nome: 'Pêssego', primary: '#FFD9B8', primaryDark: '#FFBD8A', accent: '#B08968', bg: '#FFF8F1' },
+  { nome: 'Café com Leite', primary: '#E3CCB8', primaryDark: '#C9A47F', accent: '#8C6E54', bg: '#FBF6F0' },
 ];
 
 export default function Configuracoes() {
@@ -21,10 +30,16 @@ export default function Configuracoes() {
   const resetAll = useStore((s) => s.resetAll);
   const ativacao = getActivation();
 
-  const aplicarCor = (key, varName, value) => {
-    setTema({ [key]: value });
-    document.documentElement.style.setProperty(varName, value);
+  const aplicarTema = (preset) => {
+    setTema(preset);
+    Object.entries(VAR_MAP).forEach(([key, varName]) => {
+      document.documentElement.style.setProperty(varName, preset[key]);
+    });
   };
+
+  const temaAtivo = TEMAS.find(
+    (t) => t.primary === tema.primary && t.primaryDark === tema.primaryDark && t.accent === tema.accent && t.bg === tema.bg
+  );
 
   const trocarCodigo = () => {
     if (confirm('Isso vai pedir um novo código de ativação ao reabrir o app. Continuar?')) {
@@ -51,20 +66,29 @@ export default function Configuracoes() {
 
       <SectionTitle>Cores do tema</SectionTitle>
       <Card className="mb-5">
+        <p className="text-xs text-text-light mb-3">Escolha um tema pastel para o app.</p>
         <div className="grid grid-cols-2 gap-3">
-          {CORES.map((c) => (
-            <Field key={c.key} label={c.label}>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={tema[c.key]}
-                  onChange={(e) => aplicarCor(c.key, c.varName, e.target.value)}
-                  className="w-10 h-10 rounded-xl border border-accent-light/70 cursor-pointer bg-transparent"
-                />
-                <span className="text-xs text-text-light">{tema[c.key]}</span>
-              </div>
-            </Field>
-          ))}
+          {TEMAS.map((t) => {
+            const ativo = temaAtivo?.nome === t.nome;
+            return (
+              <button
+                key={t.nome}
+                onClick={() => aplicarTema(t)}
+                className={`rounded-2xl p-3 text-left border-2 transition ${
+                  ativo ? 'border-primary-dark' : 'border-transparent bg-accent-light/25'
+                }`}
+                style={ativo ? { backgroundColor: t.bg } : undefined}
+              >
+                <div className="flex gap-1 mb-2">
+                  <span className="w-6 h-6 rounded-full border border-black/5" style={{ backgroundColor: t.primary }} />
+                  <span className="w-6 h-6 rounded-full border border-black/5" style={{ backgroundColor: t.primaryDark }} />
+                  <span className="w-6 h-6 rounded-full border border-black/5" style={{ backgroundColor: t.accent }} />
+                </div>
+                <p className="text-xs font-semibold text-text">{t.nome}</p>
+                {ativo && <p className="text-[10px] text-primary-dark font-medium">Selecionado</p>}
+              </button>
+            );
+          })}
         </div>
       </Card>
 
