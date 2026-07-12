@@ -60,7 +60,21 @@ export default function ReceitaForm() {
 
   return (
     <div>
-      <Header title={isNovo ? 'Montar Receita' : 'Editar Receita'} onBack={true} />
+      <Header
+        title={isNovo ? 'Montar Receita' : 'Editar Receita'}
+        onBack={true}
+        right={
+          !isNovo && (
+            <button
+              onClick={() => navigate(`/receitas/${id}/ficha`)}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-white text-accent shadow-sm active:scale-95 transition shrink-0"
+              aria-label="Imprimir ficha técnica"
+            >
+              🖨️
+            </button>
+          )
+        }
+      />
       <div className="px-5">
         <PhotoPicker value={form.foto} onChange={(foto) => set({ foto })} label="Foto do bolo" />
 

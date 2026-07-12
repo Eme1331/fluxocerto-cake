@@ -11,6 +11,7 @@ import Configuracoes from './pages/Configuracoes';
 import Pedidos from './pages/Pedidos';
 import PedidoForm from './pages/PedidoForm';
 import MateriaPrimaForm from './pages/MateriaPrimaForm';
+import FichaTecnica from './pages/FichaTecnica';
 import { useStore } from './store/useStore';
 import { checkActivation } from './utils/activation';
 
@@ -59,6 +60,7 @@ function App() {
             <Route path="/materia-prima/:id" element={<MateriaPrimaForm />} />
             <Route path="/receitas" element={<Receitas />} />
             <Route path="/receitas/:id" element={<ReceitaForm />} />
+            <Route path="/receitas/:id/ficha" element={<FichaTecnica />} />
             <Route path="/config" element={<Configuracoes />} />
             <Route path="/pedidos" element={<Pedidos />} />
             <Route path="/pedidos/:id" element={<PedidoForm />} />
