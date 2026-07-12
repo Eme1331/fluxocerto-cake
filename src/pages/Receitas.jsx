@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { calcReceitaCompleta, formatBRL } from '../utils/calc';
 import { Card, Button, EmptyState } from '../components/ui';
+import CalculadoraPorcao from '../components/CalculadoraPorcao';
 
 export default function Receitas() {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ export default function Receitas() {
       <Button className="w-full mb-4" onClick={() => navigate('/receitas/novo')}>
         ➕ Montar novo bolo
       </Button>
+
+      {!!receitas.length && <CalculadoraPorcao receitas={receitas} listas={listas} />}
 
       {!receitas.length ? (
         <EmptyState icon="🎂" title="Nenhuma receita montada" subtitle="Combine seus componentes para calcular o preço ideal." />
