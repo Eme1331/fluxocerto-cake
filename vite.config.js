@@ -31,6 +31,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
+        // jsPDF inclui um plugin doc.html() carregado sob demanda (html2canvas,
+        // dompurify, canvg) que este app nunca usa — não faz sentido pré-cachear.
+        globIgnores: ['**/html2canvas-*.js', '**/purify.es-*.js', '**/index.es-*.js'],
       },
     }),
   ],

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { calcReceitaCompleta, calcIngredientCost, UNIT_OPTIONS } from '../utils/calc';
@@ -45,6 +45,8 @@ function GrupoComponente({ titulo, itens, materiasPrimas }) {
 export default function FichaTecnica() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [gerando, setGerando] = useState(false);
+  const [erro, setErro] = useState('');
 
   const receitas = useStore((s) => s.receitas);
   const massas = useStore((s) => s.massas);
@@ -64,6 +66,19 @@ export default function FichaTecnica() {
 
   const dataEmissao = new Date().toLocaleDateString('pt-BR');
 
+  const baixarPdf = async () => {
+    setErro('');
+    setGerando(true);
+    try {
+      const { gerarFichaTecnicaPDF } = await import('../utils/pdfFichaTecnica');
+      gerarFichaTecnicaPDF({ receita, calc, materiasPrimas, usuarioNome });
+    } catch (err) {
+      setErro('Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+      setGerando(false);
+    }
+  };
+
   if (!receita || !calc) {
     return (
       <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center gap-3">
@@ -76,15 +91,19 @@ export default function FichaTecnica() {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#E9E1DC] z-50 overflow-y-auto print:bg-white print:static">
-      <div className="print:hidden sticky top-0 bg-[#E9E1DC]/95 backdrop-blur px-4 py-3 flex items-center justify-between max-w-[720px] mx-auto">
+    <div className="fixed inset-0 bg-[#E9E1DC] z-50 overflow-y-auto">
+      <div className="sticky top-0 bg-[#E9E1DC]/95 backdrop-blur px-4 py-3 flex items-center justify-between max-w-[720px] mx-auto">
         <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-accent">←</button>
-        <button
-          onClick={() => window.print()}
-          className="bg-primary-dark text-white text-sm font-semibold rounded-2xl px-4 py-2"
-        >
-          🖨️ Imprimir ficha técnica
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={baixarPdf}
+            disabled={gerando}
+            className="bg-primary-dark text-white text-sm font-semibold rounded-2xl px-4 py-2 disabled:opacity-60"
+          >
+            {gerando ? 'Gerando...' : '⬇️ Baixar PDF'}
+          </button>
+          {erro && <p className="text-[11px] text-danger font-medium">{erro}</p>}
+        </div>
       </div>
 
       <div className="max-w-[640px] mx-auto bg-white my-6 print:my-0 px-9 py-8 text-[#2E2620] shadow-[0_2px_10px_rgba(0,0,0,0.12)] print:shadow-none" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
